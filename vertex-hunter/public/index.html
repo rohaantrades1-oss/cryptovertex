@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex Hunter</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='%2327e6ff' stroke-width='2'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%2327e6ff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<canvas id="particles" aria-hidden="true"></canvas>
+<header class="top">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><b>VERTEX</b><span class="dim">HUNTER</span><span class="tag">PAPER ONLY</span></div>
+  <nav id="nav" role="tablist">
+    <button data-tab="scanner" class="active">LIVE SCANNER</button>
+    <button data-tab="history">SIGNAL HISTORY</button>
+    <button data-tab="wallet">AI WALLET</button>
+    <button data-tab="strategies">STRATEGIES</button>
+    <button data-tab="analytics">ANALYTICS</button>
+    <button data-tab="settings">SETTINGS</button>
+  </nav>
+  <div class="status">
+    <div id="healthPill" class="pill disc"><i></i><span>CONNECTING</span></div>
+    <div class="dim small" id="healthDetail">&nbsp;</div>
+    <button id="bell" class="bell" title="Notifications" aria-label="Notifications">&#9679;<em id="bellCount" hidden>0</em></button>
+  </div>
+</header>
+<div id="banner" class="banner" hidden></div>
+<main>
+  <section id="tab-scanner" class="tab active">
+    <div class="scan-head">
+      <div><h2>Ranked shortlist</h2><div class="dim small">Candidates ranked by an explainable score. Not a list of biggest gainers. A score is <b>not</b> a probability of success.</div></div>
+      <div class="scan-meta small dim" id="scanMeta"></div>
+    </div>
+    <div class="legend small"><span><i class="dot g"></i>bullish setup</span><span><i class="dot r"></i>bearish / downside</span><span><i class="dot a"></i>watch / uncertain</span><span class="dim">Animation = scanning activity, never certainty.</span></div>
+    <div class="table-wrap"><table id="shortlist"><thead><tr><th></th><th>Contract</th><th>Setup</th><th class="num">Score</th><th>Trend</th><th class="num">Price</th><th class="num">24h</th><th class="num">24h turnover</th><th>Risk</th><th>Top reason</th><th class="num">Age</th></tr></thead><tbody></tbody></table></div>
+    <div id="scanEmpty" class="empty" hidden></div>
+    <h3 class="sub">Market overview <span class="dim small">top by turnover, for reference only</span></h3>
+    <div class="table-wrap"><table id="market"><thead><tr><th>Contract</th><th class="num">Price</th><th class="num">24h</th><th class="num">Est. turnover</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="tab-history" class="tab">
+    <div class="scan-head"><h2>Signal history</h2><div class="small dim">Entry prices are the live price recorded at signal time and are immutable. ROI is hypothetical, unleveraged price return; "est. net" subtracts modelled fees, slippage and funding.</div></div>
+    <div class="filters"><select id="histStatus"><option value="">All statuses</option><option>OPEN</option><option>TARGET</option><option>INVALIDATED</option><option>EXPIRED</option><option>PROMOTED</option></select><input id="histSymbol" placeholder="Filter contract e.g. BTC_USDT"></div>
+    <div class="table-wrap"><table id="histTable"><thead><tr><th>Time</th><th>Contract</th><th>Dir</th><th>State</th><th class="num">Entry</th><th class="num">Current / exit</th><th class="num">Elapsed</th><th class="num">Gross ROI</th><th class="num">Est. net</th><th class="num">MFE / MAE</th><th>Status</th><th class="num">Score</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="tab-wallet" class="tab">
+    <div class="scan-head"><h2>AI Wallet <span class="tag">VIRTUAL $100</span></h2><div class="small dim">Independent paper portfolio. No exchange credentials exist in this system and no real orders can be placed.</div></div>
+    <div class="cards" id="walletCards"></div>
+    <div class="grid2">
+      <div><h3 class="sub">Open virtual positions</h3><div class="table-wrap"><table id="posTable"><thead><tr><th>Contract</th><th>Dir</th><th class="num">Qty</th><th class="num">Avg entry</th><th class="num">Mark</th><th class="num">Margin</th><th class="num">Price move</th><th class="num">Net PnL</th><th class="num">Margin ROI</th><th class="num">Stop / target</th></tr></thead><tbody></tbody></table></div>
+      <h3 class="sub">Closed positions</h3><div class="table-wrap"><table id="closedTable"><thead><tr><th>Closed</th><th>Contract</th><th>Dir</th><th class="num">Entry</th><th class="num">Realised net</th></tr></thead><tbody></tbody></table></div></div>
+      <div><h3 class="sub">Equity, mark-to-market <span class="dim small">snapshot every 30s · dashed = $100 start</span></h3><canvas id="eqChart" height="150"></canvas><h3 class="sub">Activity feed</h3><div id="activity" class="feed"></div></div>
+    </div>
+  </section>
+
+  <section id="tab-strategies" class="tab"><div class="scan-head"><h2>Strategies</h2><div class="small dim" id="stratVer"></div></div><div id="stratList" class="cards wide"></div><div id="weights"></div></section>
+
+  <section id="tab-analytics" class="tab">
+    <div class="scan-head"><h2>Analytics &amp; validation</h2><div class="small dim">Live paper statistics are small-sample and unproven. Backtests use real historical MEXC candles but cannot include historical OI, funding or order-book data.</div></div>
+    <div id="analyticsLive" class="cards"></div>
+    <div class="panel"><h3>Historical backtest <span class="tag">REAL MEXC CANDLES</span></h3>
+      <div class="filters"><label>Days <input id="btDays" type="number" min="1" max="14" value="5" style="width:70px"></label><button id="btRun" class="btn">Run backtest on top liquid contracts</button><span class="small dim" id="btStatus"></span></div>
+      <div id="btResult" class="small dim">No backtest run yet. Results will show in-sample vs unseen (out-of-sample) performance and an explicit evidence verdict.</div></div>
+    <div class="panel"><h3>Audit log</h3><div id="eventLog" class="feed mono small"></div></div>
+  </section>
+
+  <section id="tab-settings" class="tab"><div class="scan-head"><h2>Settings</h2><div class="small dim">Every change creates a new immutable config version; revert any time. Wallet actions record the config version used.</div></div><div id="settingsBody"></div></section>
+</main>
+
+<aside id="detail" class="detail" hidden>
+  <div class="detail-head"><div><b id="dTitle"></b> <span id="dBadge"></span><div class="dim small" id="dSub"></div></div><div><select id="dInterval"><option value="Min5">5m</option><option value="Min15">15m</option><option value="Min60">1h</option><option value="Hour4">4h</option></select> <button id="dClose" class="btn ghost" aria-label="Close">&times;</button></div></div>
+  <div class="detail-body">
+    <div class="price-row"><div class="big" id="dPrice"></div><div id="dChange"></div></div>
+    <div id="chart"></div>
+    <div id="dBody"></div>
+  </div>
+</aside>
+<div id="notifPanel" class="notif" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<script src="/vendor/lightweight-charts.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

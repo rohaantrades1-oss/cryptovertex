@@ -1,0 +1,23 @@
+{
+  "name": "vertex-hunter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MEXC Futures early-momentum scanner with persistent signal tracking and a virtual $100 paper wallet. Paper trading only.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.ts",
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/**/*.test.ts\"",
+    "build:vendor": "node scripts/copy-vendor.mjs",
+    "postinstall": "node scripts/copy-vendor.mjs",
+    "probe": "node --disable-warning=ExperimentalWarning scripts/probe-mexc.ts"
+  },
+  "dependencies": {
+    "lightweight-charts": "^5.0.0"
+  },
+  "devDependencies": {
+    "ws": "^8.22.0"
+  }
+}
